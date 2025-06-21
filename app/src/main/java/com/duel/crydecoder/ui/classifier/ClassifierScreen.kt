@@ -123,7 +123,7 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onRecordClick,
             modifier =
@@ -143,7 +143,7 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                 modifier = Modifier.size(90.dp)
             )
         }
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         // Result Display
         Box(
             modifier = Modifier
@@ -175,7 +175,6 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                 Card (
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
                         .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                     ,
                     colors = androidx.compose.material3.CardDefaults.cardColors(
@@ -211,7 +210,7 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                 }
             }
         }
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 
