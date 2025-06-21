@@ -56,4 +56,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT")
+    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT")
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
 }
