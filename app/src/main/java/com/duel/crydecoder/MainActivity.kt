@@ -8,19 +8,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duel.crydecoder.ui.classifier.ClassifierScreen
 import com.duel.crydecoder.ui.classifier.ClassifierViewModel
-import com.duel.crydecoder.ui.classifier.ClassifierUiState
 import com.duel.crydecoder.ui.theme.CryDecoderTheme
+
 
 class MainActivity : ComponentActivity() {
 
@@ -35,50 +33,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Ask for audio permission when the app starts
         requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-
         setContent {
             CryDecoderTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // This properly initializes the ViewModel
-                    val viewModel: ClassifierViewModel = viewModel()
-                    // This collects the state from the ViewModel
-                    val uiState by viewModel.uiState.collectAsState()
-                    var selected by remember { mutableStateOf("home") }
-
-
-                    // This calls your UI, passing the state and the click handler
-                    ClassifierScreen(
-                        uiState = uiState,
-                        onRecordClick = { viewModel.onRecordClick() } ,
-                        selectedRoute = selected,
-                        onNavigate = { selected = it }
-                    )
+                    AppNavigation()
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ClassifierScreenPreview() {
-    var selected by remember { mutableStateOf("record") }
-    val fakeUiState = ClassifierUiState(
-        isRecording = false,
-        resultText = "No result yet",
-        isLoading = false
-    )
-
-    ClassifierScreen(
-        uiState = fakeUiState,
-        onRecordClick = {}, // No-op for preview
-        selectedRoute = selected,
-        onNavigate = { selected = it }
-    )
 }
