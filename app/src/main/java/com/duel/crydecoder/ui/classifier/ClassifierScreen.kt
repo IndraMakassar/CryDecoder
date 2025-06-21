@@ -59,95 +59,81 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
     }
     val explanationText = matchedKeyword?.let { keywordDescriptions[it] } ?: "No specific cry detected."
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { TopBar(title = "Cry Decoder thtehte", scrollBehavior = scrollBehavior) },
-        bottomBar = {
-            NavBar(
-                items = navItems,
-                selectedRoute = selectedRoute,
-                onNavigate = onNavigate
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Baby Cry Classifier",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Detect if your baby is hungry, tired, in pain, or needs a diaper change.",
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = Modifier.height(60.dp))
+        Button(
+            onClick = onRecordClick,
+            modifier = Modifier.size(200.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (uiState.isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            ),
+            enabled = !uiState.isLoading,
+            shape = CircleShape
+        ) {
+            Icon(
+                imageVector = if (uiState.isRecording) Icons.Default.Stop else Icons.Default.Mic,
+                contentDescription = if (uiState.isRecording) "Recording" else "Paused",
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(90.dp)
             )
         }
-
-    ) { innerPadding ->
-        Column(
+        // Result Display
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(innerPadding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Baby Cry Classifier",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Detect if your baby is hungry, tired, in pain, or needs a diaper change.",
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(60.dp))
-            Button(
-                onClick = onRecordClick,
-                modifier = Modifier.size(200.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (uiState.isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                ),
-                enabled = !uiState.isLoading,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = if (uiState.isRecording) Icons.Default.Stop else Icons.Default.Mic,
-                    contentDescription = if (uiState.isRecording) "Recording" else "Paused",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(90.dp)
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(50.dp))
+            } else {
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = uiState.resultText,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-            }
-            // Result Display
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(50.dp))
-                } else {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
+                    Spacer(modifier = Modifier.height(30.dp))
+                    if (keywords.any { keyword -> uiState.resultText.contains(keyword, ignoreCase = true) }) {
                         Text(
-                            text = uiState.resultText,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Medium,
+                            text = explanationText,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 16.dp)
                         )
-                        Spacer(modifier = Modifier.height(30.dp))
-                        if (keywords.any { keyword -> uiState.resultText.contains(keyword, ignoreCase = true) }) {
-                            Text(
-                                text = explanationText,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(top = 16.dp)
-                            )
-                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(60.dp))
         }
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
