@@ -31,7 +31,6 @@ fun HistoryCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically // penting: untuk sejajar vertikal
         ) {
-            // Kolom kiri (judul & penjelasan)
             Column(
                 modifier = Modifier
                     .weight(2f),

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 class HistoryViewModel (application: Application) : AndroidViewModel(application)  {
-    // Internal mutable state
     private val _uiState = MutableStateFlow(HistoryUiState())
 
     val uiState: StateFlow<HistoryUiState> = _uiState
