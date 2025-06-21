@@ -80,7 +80,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
             return
         }
 
-        _uiState.update { it.copy(isRecording = true, resultText = "Listening for 6 seconds...") }
+        _uiState.update { it.copy(isRecording = true, isResultReady = false, resultText = "Listening for 6 seconds...") }
 
         recordingJob = viewModelScope.launch(Dispatchers.IO) {
             audioRecord = AudioRecord(
@@ -136,11 +136,11 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
                     val result = response.body()!!
                     val prediction = result.prediction
                     val confidence = (result.confidence * 100).toInt()
-                    val fullText = "Prediction: $prediction ($confidence%)"
 
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isResultReady = true,
                             resultText = "Prediction: ${result.prediction} (${(result.confidence * 100).toInt()}%)"
                         )
                     }

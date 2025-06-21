@@ -1,16 +1,22 @@
 package com.duel.crydecoder.ui.classifier
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,17 +35,26 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.  Mic
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.duel.crydecoder.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, selectedRoute: String, onNavigate: (String) -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val scrollState = rememberScrollState()
     val keywords = listOf("belly_pain", "burping", "discomfort", "hungry", "tired")
     val keywordDescriptions = mapOf(
         "belly_pain" to "The baby may be experiencing stomach pain.",
@@ -52,15 +67,49 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
         uiState.resultText.contains(keyword, ignoreCase = true)
     }
     val explanationText = matchedKeyword?.let { keywordDescriptions[it] } ?: "No specific cry detected."
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(32.dp),
+            .verticalScroll(scrollState)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
+        Card (
+            modifier = Modifier
+                .wrapContentHeight()
+                .padding(16.dp)
+                .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                .width(150.dp),
+            colors = androidx.compose.material3.CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ){
+            Row (
+                modifier = Modifier.fillMaxWidth()
+                    .padding(8.dp)
+                ,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.crown),
+                    contentDescription = "Crown Icon",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Text(
+                    text = "Try Our Premium",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Baby Cry Classifier",
             fontSize = 28.sp,
@@ -74,12 +123,15 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         Button(
             onClick = onRecordClick,
-            modifier = Modifier.size(200.dp),
+            modifier =
+                Modifier.size(200.dp)
+                .shadow(elevation = 16.dp, shape = androidx.compose.foundation.shape.CircleShape),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (uiState.isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                containerColor = if (uiState.isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
             enabled = !uiState.isLoading,
             shape = CircleShape
@@ -91,38 +143,70 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                 modifier = Modifier.size(90.dp)
             )
         }
+        Spacer(modifier = Modifier.height(30.dp))
         // Result Display
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .wrapContentHeight()
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp))
-            } else {
-                Column (
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = uiState.resultText,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface
+            }
+            else if (!uiState.isRecording && !uiState.isResultReady){
+                Text(
+                    text = uiState.resultText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+            else if(uiState.isRecording && !uiState.isResultReady){
+                Text(
+                    text = uiState.resultText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+            else if (uiState.isResultReady) {
+                Card (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                    ,
+                    colors = androidx.compose.material3.CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(30.dp))
-                    if (keywords.any { keyword -> uiState.resultText.contains(keyword, ignoreCase = true) }) {
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
-                            text = explanationText,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(top = 16.dp)
+                            text = uiState.resultText,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            thickness = 1.dp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (keywords.any { keyword -> uiState.resultText.contains(keyword, ignoreCase = true) }) {
+                            Text(
+                                text = explanationText,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
