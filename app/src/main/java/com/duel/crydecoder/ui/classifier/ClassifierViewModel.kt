@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.duel.crydecoder.data.RetrofitInstance
+import com.duel.crydecoder.ui.history.HistoryUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,16 +46,14 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun onRecordClick() {
+    fun onRecordClick(onResult: (HistoryUiState) -> Unit) {
         if (_uiState.value.isRecording) {
-            // Stop recording early without classifying
             recordingJob?.cancel()
             stopRecordingOnly()
         } else {
-            startRecording()
+            startRecording(onResult)
         }
     }
-
     private fun stopRecordingOnly() {
         audioRecord?.apply {
             stop()
@@ -75,7 +74,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
     }
 
 
-    private fun startRecording() {
+    private fun startRecording(onResult: (HistoryUiState) -> Unit) {
         if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             _uiState.update { it.copy(resultText = "Audio permission not granted.") }
             return
@@ -97,7 +96,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
             try {
                 delay(durationSecs * 1000L)
                 if (_uiState.value.isRecording) {
-                    stopRecordingAndClassify()
+                    stopRecordingAndClassify(onResult)
                 }
             } catch (e: CancellationException) {
                 // Recording was stopped early
@@ -105,7 +104,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    private fun stopRecordingAndClassify() {
+    private fun stopRecordingAndClassify(onResult: (HistoryUiState) -> Unit) {
         val recorder = audioRecord ?: return
 
         recordingJob?.cancel()
@@ -135,12 +134,24 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
 
                 if (response.isSuccessful && response.body() != null) {
                     val result = response.body()!!
+                    val prediction = result.prediction
+                    val confidence = (result.confidence * 100).toInt()
+                    val fullText = "Prediction: $prediction ($confidence%)"
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             resultText = "Prediction: ${result.prediction} (${(result.confidence * 100).toInt()}%)"
                         )
                     }
+                    onResult(
+                        HistoryUiState(
+                            title = prediction,
+                            explanation = getExplanation(prediction),
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
+
                 } else {
                     _uiState.update { it.copy(isLoading = false, resultText = "Server error: ${response.code()}") }
                 }
@@ -191,3 +202,15 @@ fun writeWavFile(audioData: ShortArray, file: File, sampleRate: Int) {
     outputStream.write(byteBuffer)
     outputStream.close()
 }
+
+private fun getExplanation(label: String): String {
+    return when (label.lowercase()) {
+        "belly_pain" -> "The baby may be experiencing stomach pain."
+        "burping" -> "The baby might need to burp."
+        "discomfort" -> "The baby feels uncomfortable."
+        "hungry" -> "The baby is hungry and needs to be fed."
+        "tired" -> "The baby is tired and likely needs sleep."
+        else -> "No specific cry detected."
+    }
+}
+

@@ -6,8 +6,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavBar(items: List<NavItem>, selectedRoute: String, onNavigate: (String) -> Unit) {

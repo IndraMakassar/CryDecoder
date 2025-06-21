@@ -65,8 +65,11 @@ fun AppNavigation() {
             composable("home") {
                 ClassifierScreen(
                     uiState = classifierUiState,
-                    onRecordClick = { classifierViewModel.onRecordClick() },
-                    selectedRoute = currentRoute,
+                    onRecordClick = {
+                        classifierViewModel.onRecordClick { item ->
+                            historyViewModel.addHistoryItem(item)
+                        }
+                    },                    selectedRoute = currentRoute,
                     onNavigate = { navController.navigate(it) }
                 )
             }
