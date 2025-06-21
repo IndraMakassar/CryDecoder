@@ -11,6 +11,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,11 +49,15 @@ class MainActivity : ComponentActivity() {
                     val viewModel: ClassifierViewModel = viewModel()
                     // This collects the state from the ViewModel
                     val uiState by viewModel.uiState.collectAsState()
+                    var selected by remember { mutableStateOf("home") }
+
 
                     // This calls your UI, passing the state and the click handler
                     ClassifierScreen(
                         uiState = uiState,
-                        onRecordClick = { viewModel.onRecordClick() }
+                        onRecordClick = { viewModel.onRecordClick() } ,
+                        selectedRoute = selected,
+                        onNavigate = { selected = it }
                     )
                 }
             }
@@ -61,6 +68,7 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun ClassifierScreenPreview() {
+    var selected by remember { mutableStateOf("record") }
     val fakeUiState = ClassifierUiState(
         isRecording = false,
         resultText = "No result yet",
@@ -69,6 +77,8 @@ fun ClassifierScreenPreview() {
 
     ClassifierScreen(
         uiState = fakeUiState,
-        onRecordClick = {} // No-op for preview
+        onRecordClick = {}, // No-op for preview
+        selectedRoute = selected,
+        onNavigate = { selected = it }
     )
 }
