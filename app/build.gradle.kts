@@ -60,6 +60,11 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT")
     implementation("org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT")
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp3.okhttp)
+    implementation(libs.logging.interceptor)
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
 }
