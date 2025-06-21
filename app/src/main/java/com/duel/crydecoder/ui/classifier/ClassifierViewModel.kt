@@ -24,6 +24,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.Job
 
 class ClassifierViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -36,16 +38,42 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
     private val durationSecs = 6
     private val bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
 
+    private var recordingJob: Job? = null
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
         }
     }
 
     fun onRecordClick() {
-        if (!_uiState.value.isRecording) {
+        if (_uiState.value.isRecording) {
+            // Stop recording early without classifying
+            recordingJob?.cancel()
+            stopRecordingOnly()
+        } else {
             startRecording()
         }
     }
+
+    private fun stopRecordingOnly() {
+        audioRecord?.apply {
+            stop()
+            release()
+        }
+        audioRecord = null
+        recordingJob = null
+
+        viewModelScope.launch(Dispatchers.Main) {
+            _uiState.update {
+                it.copy(
+                    isRecording = false,
+                    isLoading = false,
+                    resultText = "Recording canceled."
+                )
+            }
+        }
+    }
+
 
     private fun startRecording() {
         if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -55,7 +83,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
 
         _uiState.update { it.copy(isRecording = true, resultText = "Listening for 6 seconds...") }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        recordingJob = viewModelScope.launch(Dispatchers.IO) {
             audioRecord = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
                 sampleRate,
@@ -65,16 +93,23 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
             )
 
             audioRecord?.startRecording()
-            delay(durationSecs * 1000L)
 
-            if (_uiState.value.isRecording) {
-                stopRecordingAndClassify()
+            try {
+                delay(durationSecs * 1000L)
+                if (_uiState.value.isRecording) {
+                    stopRecordingAndClassify()
+                }
+            } catch (e: CancellationException) {
+                // Recording was stopped early
             }
         }
     }
 
     private fun stopRecordingAndClassify() {
         val recorder = audioRecord ?: return
+
+        recordingJob?.cancel()
+        recordingJob = null
 
         viewModelScope.launch(Dispatchers.Main) {
             _uiState.update { it.copy(isRecording = false, isLoading = true) }
