@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.0-rc01"
+composeBomVersion = "2025.05.00"
 converterGson = "2.9.0"
 datastorePreferences = "1.1.7"
 gson = "2.12.0"
@@ -26,6 +27,7 @@ foundationAndroid = "1.7.0"
 navigation = "2.9.0"
 
 [libraries]
+androidx-compose-bom-v20250500 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }

@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom.v20250500))
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.gson)
     implementation(libs.androidx.navigation.compose)

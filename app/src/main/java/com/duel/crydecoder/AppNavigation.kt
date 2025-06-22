@@ -40,7 +40,7 @@ fun AppNavigation() {
     }
 
     androidx.compose.material3.Scaffold(
-        topBar = { TopBar(title = title) },
+        topBar = { TopBar(title = title, uiState = classifierUiState) },
         bottomBar = {
             NavBar(
                 items = navItems,

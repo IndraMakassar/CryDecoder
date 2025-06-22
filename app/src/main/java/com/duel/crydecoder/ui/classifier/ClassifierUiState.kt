@@ -4,5 +4,6 @@ data class ClassifierUiState(
     val isRecording: Boolean = false,
     val isLoading: Boolean = false,
     val isResultReady: Boolean = false,
-    val resultText: String = "Press Button to Begin"
+    val resultText: String = "Press Button to Begin",
+    val isPremium: Boolean = false,
 )

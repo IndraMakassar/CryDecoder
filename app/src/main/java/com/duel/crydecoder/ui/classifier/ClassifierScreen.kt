@@ -2,6 +2,7 @@ package com.duel.crydecoder.ui.classifier
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import com.duel.crydecoder.R
 fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, selectedRoute: String, onNavigate: (String) -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+    val openAlertDialog = remember { mutableStateOf(false) }
     val keywords = listOf("belly_pain", "burping", "discomfort", "hungry", "tired")
     val keywordDescriptions = mapOf(
         "belly_pain" to "The baby may be experiencing stomach pain.",
@@ -67,6 +69,28 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
         uiState.resultText.contains(keyword, ignoreCase = true)
     }
     val explanationText = matchedKeyword?.let { keywordDescriptions[it] } ?: "No specific cry detected."
+    if (openAlertDialog.value) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { openAlertDialog.value = false },
+            confirmButton = {
+                Button(onClick = {
+                    openAlertDialog.value = false
+                    // Lakukan aksi saat user konfirmasi
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { openAlertDialog.value = false }) {
+                    Text("Cancel")
+                }
+            },
+            title = { Text("Premium Feature") },
+            text = { Text("This feature is only available for premium users.") }
+        )
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,38 +100,42 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Card (
-            modifier = Modifier
-                .wrapContentHeight()
-                .padding(16.dp)
-                .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
-                .width(150.dp),
-            colors = androidx.compose.material3.CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        ){
-            Row (
-                modifier = Modifier.fillMaxWidth()
-                    .padding(8.dp)
-                ,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.crown),
-                    contentDescription = "Crown Icon",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+        if (!uiState.isPremium) {
+            Card (
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(16.dp)
+                    .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                    .width(150.dp),
+                colors = androidx.compose.material3.CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
-                Text(
-                    text = "Try Our Premium",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+            ){
+                Row (
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable { openAlertDialog.value = true }, // Tambahkan ini ,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.crown),
+                        contentDescription = "Crown Icon",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    Text(
+                        text = "Try Our Premium",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
+        }else{
+            Spacer(modifier = Modifier.height(60.dp))
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
