@@ -5,6 +5,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -12,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.duel.crydecoder.ui.classifier.ClassifierScreen
+import com.duel.crydecoder.ui.classifier.ClassifierUiState
 import com.duel.crydecoder.ui.classifier.ClassifierViewModel
 import com.duel.crydecoder.ui.history.HistoryScreen
 import com.duel.crydecoder.ui.history.HistoryViewModel
@@ -70,7 +74,8 @@ fun AppNavigation() {
                             historyViewModel.addHistoryItem(item)
                         }
                     },                    selectedRoute = currentRoute,
-                    onNavigate = { navController.navigate(it) }
+                    onNavigate = { navController.navigate(it) },
+                    onUpgradePremium = { classifierViewModel.upgradeToPremium() }
                 )
             }
             composable("history") {

@@ -141,7 +141,7 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
                         it.copy(
                             isLoading = false,
                             isResultReady = true,
-                            resultText = "Prediction: ${result.prediction} (${(result.confidence * 100).toInt()}%)"
+                            resultText =  if (!_uiState.value.isPremium) "Prediction: ${result.prediction} (${(result.confidence * 100).toInt()}%)" else "Prediction: Deaf (50%)"
                         )
                     }
                     onResult(
@@ -166,6 +166,10 @@ class ClassifierViewModel(application: Application) : AndroidViewModel(applicati
     override fun onCleared() {
         super.onCleared()
         audioRecord?.release()
+    }
+
+    fun upgradeToPremium() {
+        _uiState.update { it.copy(isPremium = true) }
     }
 }
 
@@ -213,4 +217,6 @@ private fun getExplanation(label: String): String {
         else -> "No specific cry detected."
     }
 }
+
+
 

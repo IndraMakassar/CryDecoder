@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.  Mic
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
@@ -50,10 +52,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.duel.crydecoder.R
+import com.duel.crydecoder.ui.widget.PremiumFeatureAlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, selectedRoute: String, onNavigate: (String) -> Unit) {
+fun ClassifierScreen(
+    uiState: ClassifierUiState,
+    onRecordClick: () -> Unit,
+    selectedRoute: String,
+    onNavigate: (String) -> Unit,
+    onUpgradePremium: () -> Unit
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
     val openAlertDialog = remember { mutableStateOf(false) }
@@ -63,30 +72,20 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
         "burping" to "The baby might need to burp.",
         "discomfort" to "The baby feels uncomfortable.",
         "hungry" to "The baby is hungry and needs to be fed.",
-        "tired" to "The baby is tired and likely needs sleep."
+        "tired" to "The baby is tired and likely needs sleep.",
+        "deaf" to "The result may indicate signs of hearing issues. It's recommended to consult a pediatrician or hearing specialist for early evaluation."
     )
     val matchedKeyword = keywordDescriptions.keys.find { keyword ->
         uiState.resultText.contains(keyword, ignoreCase = true)
     }
     val explanationText = matchedKeyword?.let { keywordDescriptions[it] } ?: "No specific cry detected."
     if (openAlertDialog.value) {
-        androidx.compose.material3.AlertDialog(
+        PremiumFeatureAlertDialog(
             onDismissRequest = { openAlertDialog.value = false },
-            confirmButton = {
-                Button(onClick = {
-                    openAlertDialog.value = false
-                    // Lakukan aksi saat user konfirmasi
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { openAlertDialog.value = false }) {
-                    Text("Cancel")
-                }
-            },
-            title = { Text("Premium Feature") },
-            text = { Text("This feature is only available for premium users.") }
+            onConfirm = {
+                onUpgradePremium()
+                openAlertDialog.value = false
+            }
         )
     }
 
@@ -105,9 +104,9 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                 modifier = Modifier
                     .wrapContentHeight()
                     .padding(16.dp)
-                    .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
                     .width(150.dp),
-                colors = androidx.compose.material3.CardDefaults.cardColors(
+                colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             ){
@@ -156,7 +155,7 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
             onClick = onRecordClick,
             modifier =
                 Modifier.size(200.dp)
-                .shadow(elevation = 16.dp, shape = androidx.compose.foundation.shape.CircleShape),
+                .shadow(elevation = 16.dp, shape = CircleShape),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (uiState.isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -205,7 +204,7 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
                         .fillMaxWidth()
                         .shadow(elevation = 4.dp, shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                     ,
-                    colors = androidx.compose.material3.CardDefaults.cardColors(
+                    colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
@@ -242,18 +241,4 @@ fun ClassifierScreen(uiState: ClassifierUiState, onRecordClick: () -> Unit, sele
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun ClassifierScreenPreview() {
-    val fakeUiState = ClassifierUiState()
-    var selected by remember { mutableStateOf("home") }
-
-    ClassifierScreen(
-        uiState = fakeUiState,
-        onRecordClick = {},
-        selectedRoute = selected,
-        onNavigate = { selected = it }
-    )
-}
 
